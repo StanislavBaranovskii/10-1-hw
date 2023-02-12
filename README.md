@@ -27,35 +27,23 @@
 Разверните топологию из лекции и выполните установку и настройку сервиса Keepalived.
 ```
 vrrp_instance test {
-
 state "name_mode"
-
 interface "name_interface"
-
 virtual_router_id "number id"
-
 priority "number priority"
-
 advert_int "number advert"
 
 authentication {
-
 auth_type "auth type"
-
 auth_pass "password"
-
 }
 
 unicast_peer {
-
 "ip address host"
-
 }
 
 virtual_ipaddress {
-
 "ip address host" dev "interface" label "interface":vip
-
 }
 
 }
@@ -149,6 +137,6 @@ sudo ip link set dev enp0s8 down  # На ноде master
 # На виртуальной машине 3 :
 tshark -T fields -r /home/baranovskii/keepalived.pcap -e icmp.data_time -e ip.src -e eth.src -e ip.dst -e eth.dst
 ```
-![Скриншот из tshark](https://github.com/StanislavBaranovskii/10-1-hw-prometheus/blob/main/img/10-1-2.png "Скриншот из thark")
+![Скриншот из tshark](https://github.com/StanislavBaranovskii/10-1-hw/blob/main/img/10-1-2.png "Скриншот из thark")
 
 ---
