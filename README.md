@@ -63,7 +63,63 @@ virtual_ipaddress {
 ```
 *Пришлите скриншот рабочей конфигурации и состояния сервиса для каждого нода.*
 ```
+sudo apt update
+apt install iptables-persistent keepalived
+sudo iptables -I INPUT -p vrrp -d 224.0.0.18 -j ACCEPT
+netfilter-persistent save
+nano /etc/keepalived/keepalived.conf  # Содержимое файла keepalived.conf для нод master и backup ниже в блоке
+sudo systemctl start keepalived
+sudo systemctl enable keepalived
+sudo systemctl status keepalived
+ip add
+```
+Файл keepalived.conf для ноды MASTER
+```
+vrrp_instance test {
+state MASTER
+interface enp0s8
+virtual_router_id 10
+priority 110
+advert_int 4
 
+authentication {
+auth_type AH
+auth_pass password
+}
+
+unicast_peer {
+192.168.56.3
+}
+
+virtual_ipaddress {
+192.168.56.50 dev enp0s8 label enp0s8:vip
+}
+
+}
+```
+Файл keepalived.conf для ноды BACKUP
+```
+vrrp_instance test {
+state BACKUP
+interface enp0s8
+virtual_router_id 10
+priority 110
+advert_int 4
+
+authentication {
+auth_type AH
+auth_pass password
+}
+
+unicast_peer {
+192.168.56.2
+}
+
+virtual_ipaddress {
+192.168.56.50 dev enp0s8 label enp0s8:vip
+}
+
+}
 ```
 
 ![Скриншот рабочей конфигурации](https://github.com/StanislavBaranovskii/10-1-hw/blob/main/img/10-1-1.png "Скриншот рабочей конфигурации")
@@ -82,8 +138,17 @@ virtual_ipaddress {
 
 *Пришлите скриншот до и после выключения интерфейса из Wireshark.*
 ```
+# На виртуальной машине 3 :
+sudo touch /home/baranovskii/keepalived.pcap
+sudo tshark -i enp0s8 -f icmp -w /home/baranovskii/keepalived.pcap
+ping 192.168.56.50
+
+# На ноде master :
+sudo ip link set dev enp0s8 down  # На ноде master
+
+# На виртуальной машине 3 :
+tshark -T fields -r /home/baranovskii/keepalived.pcap -e icmp.data_time -e ip.src -e eth.src -e ip.dst -e eth.dst
 ```
-![Скриншот до выключения интерфейса из Wireshark](https://github.com/StanislavBaranovskii/10-1-hw-prometheus/blob/main/img/10-1-2-1.png "Скриншот до выключения интерфейса из Wireshark")
-![Скриншот после выключения интерфейса из Wireshark](https://github.com/StanislavBaranovskii/10-1-hw-prometheus/blob/main/img/10-1-2-1.png "Скриншот после выключения интерфейса из Wireshark")
+![Скриншот из tshark](https://github.com/StanislavBaranovskii/10-1-hw-prometheus/blob/main/img/10-1-2.png "Скриншот из thark")
 
 ---
